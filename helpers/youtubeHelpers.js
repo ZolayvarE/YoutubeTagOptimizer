@@ -80,20 +80,30 @@ var sortTagsByPopularity = function (tags, callback) {
     }
   });
 
+  var results = [];
   var count, wordCount;
   for (var key in countObject) {
     count = countObject[key];
     wordCount = key.split(' ').length;
-    countObject[key] = count + Math.min(count, wordCount) - 1;
+    countObject[key] = count + Math.min(count, (wordCount)) - 1;
+    results.push({
+      tag: key,
+      popularity: countObject[key],
+    })
   }
   
-  
+  results.sort(function (a, b) {
+    return b.popularity - a.popularity;
+  })
+
+  console.log(results);
 };
 
 module.exports = {
   getIdsFor: getTopVideoIds,
   getVideoDetailsFor: getVideoDetailsById,
   getTagsFor: getTagsForTopic,
+  sortTags: sortTagsByPopularity,
 };
 
 
