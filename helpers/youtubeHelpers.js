@@ -102,11 +102,40 @@ var sortTagsByPopularity = function (tags, callback) {
   });
 };
 
+var getSortedTagsForTopic = function (topic, callback, number) {
+  getTagsForTopic(topic, function (error, tags) {
+    if (error) {
+      callback(error, null);
+    } else {
+      callback(null, sortTagsByPopularity(tags));
+    }
+  }, number);
+};
+
+var getIdealTagsForTopic = function (topic, callback, number) {
+  getSortedTagsForTopic(topic, function (error, tags) {
+    var idealTags = settings.defaultTags.slice(0);
+    tags.forEach(function (tag, index) {
+      if (idealTags.join(', ').length + tag.length + 2 < 500) {
+        idealTags.push(tag);
+      }
+    });
+
+    callback(null, idealTags);
+  }, number);
+};
+
+var getMostRecentVideosByChannelId = function () {
+
+};
+
 module.exports = {
   getIdsFor: getTopVideoIds,
   getVideoDetailsFor: getVideoDetailsById,
   getTagsFor: getTagsForTopic,
   sortTags: sortTagsByPopularity,
+  getSortedTagsFor: getSortedTagsForTopic,
+  getIdealTagsFor: getIdealTagsForTopic
 };
 
 
