@@ -1,10 +1,17 @@
+var express = require('express');
+var bodyParser = require('bodyParser');
+var passport = require('passport');
 var youtube = require('./helpers/youtubeHelpers.js');
 
-youtube.getIdealTagsFor('dogs', function (err, tags) {
-  console.log(tags.join(', '));
-  console.log(tags.join(', ').length);
-});
+var app = express();
 
+app.use(bodyParser.json());
+
+
+
+
+
+app.listen(process.env.PORT || 3571);
 
 
 
