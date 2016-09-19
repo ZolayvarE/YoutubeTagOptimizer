@@ -16,54 +16,83 @@ var url = [
   '&redirect_uri=http://localhost:3571/authenticated'
 ].join('');
 
-// console.log('\n\nAuthentication Url:\n' + url + '\n\n')
-
-
 var app = express();
+
+var busy = false;
 
 app.use(bodyParser.json());
 
 app.use(express.static(__dirname + '/client'));
 
 app.get('/', function (req, res) {
-  res.redirect(url);
-});
-
-app.get('/login', passport.authenticate(), function (req, res) {
-  console.log(req);
-  console.log(res);
+  if (busy) {
+    res.send('The server is busy right now.');
+  } else {
+    res.redirect(url);
+  }
 });
 
 app.get('/authenticated', function (req, res) {
-  if (req.query.code) {
-    var tokenUrl = [
-      'https://accounts.google.com/o/oauth2/token',
-      '?',
-      '&grant_type=authorization_code',
-      '&code=' + req.query.code,
-      '&client_id=' + settings.clientID,
-      '&client_secret=' + settings.clientSecret,
-      '&redirect_uri=http://localhost:3571/authenticated',
-    ].join('');
+  if (busy) {
+    res.send('The server is busy right now.');
+  } else {
+    res.send('We\'re working on it now!');
+    if (req.query.code) {
+      var tokenUrl = 'https://accounts.google.com/o/oauth2/token';
 
-    console.log('\n\nToken Url:\n' + tokenUrl);
+      request.post(tokenUrl, { 
+        form: {
+          'grant_type': 'authorization_code',
+          'code': req.query.code,
+          'client_id': settings.clientID,
+          'client_secret': settings.clientSecret,
+          'redirect_uri': 'http://localhost:3571/authenticated'
+        }
+      }, function (error, response, body) {
+        token = JSON.parse(body)['access_token'];
+        busy = true;
+        youtube.getOwnVideos(function (error, videoIds) {
+          request({
+            url: [
+              'https://www.googleapis.com/youtube/v3/videos',
+              '?part=snippet',
+              '&key=' + settings.youtubeKey,
+              '&id=' + videoIds.join(','),
+            ].join(''),
+            method: 'GET',
+          }, function (error, response, body) {
+            // console.log(body);
+            var videos = JSON.parse(body).items;
+            var queryTarget = videos.length;
+            videos.forEach(function (video) {
+              var title = video.snippet.title;
+              var firstHyphen = title.indexOf('- ');
+              if (firstHyphen) {
+                var searchTerm = title.slice(0, firstHyphen);
+                youtube.getIdealTagsFor(searchTerm, function (error, tags) {
+                  if (error) { console.log(error); }
+                  youtube.updateTagsFor(video, tags, token, function (err, resp) {
+                    if (err) { 
+                      console.log(err);
+                    } else {
+                      console.log(resp);
+                    }
 
-    request.post(tokenUrl, { 
-      form: {
-        'grant_type': 'authorization_code',
-        'code': req.query.code,
-        'client_id': settings.clientID,
-        'client_secret': settings.clientSecret,
-        'redirect_uri': 'http://localhost:3571/authenticated'
-      }
-    }, function (error, response, body) {
-      console.log('\n\nError:\n' + error);
-      console.log('\n\nBody:\n' + body);
-    });
-
-    res.send('You did it!');
+                    queryTarget--;
+                    if (!queryTarget) {
+                      busy = false;
+                    }
+                  });
+                });
+              }
+            });
+          });
+        });
+      });
+    }
   }
 });
+
 
 var port = process.env.PORT || 3571;
 app.listen(port);

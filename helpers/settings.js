@@ -3,4 +3,5 @@ module.exports = {
   defaultTags: ['Supply Line Studios', 'Pressure Gauge Gaming'],
   clientID: '552208115327-19791jooknk80n0agadd18inajvcdv0t.apps.googleusercontent.com',
   clientSecret: 'sdUGaycq4bxYQ8ynoRlmaJmn',
+  channelId: 'UC_keYIDrj5wwwAZv2OgPHYA',
 };

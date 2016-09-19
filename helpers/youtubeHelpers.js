@@ -1,6 +1,8 @@
 var request = require('request');
 var settings = require('./settings.js');
 
+var memCache = {};
+
 var getTopVideoIds = function (term, callback, number) {
   if (number === undefined) {
     number = 25;
@@ -113,21 +115,79 @@ var getSortedTagsForTopic = function (topic, callback, number) {
 };
 
 var getIdealTagsForTopic = function (topic, callback, number) {
-  getSortedTagsForTopic(topic, function (error, tags) {
-    var idealTags = settings.defaultTags.slice(0);
-    tags.forEach(function (tag, index) {
-      if (idealTags.join(', ').length + tag.length + 2 < 500) {
-        idealTags.push(tag);
+  if (memCache[topic] !== undefined) {
+    callback(null, memCache[topic]);
+  } else {
+    getSortedTagsForTopic(topic, function (error, tags) {
+      var idealTags = settings.defaultTags.slice(0);
+      tags.forEach(function (tag, index) {
+        if (idealTags.join(', ').length + tag.length + 2 < 500) {
+          idealTags.push(tag);
+        }
+      });
+
+      memCache[topic] = idealTags;
+
+      callback(null, idealTags);
+    }, number);
+  }
+};
+
+var getMostRecentVideosByChannelId = function (callback, number) {
+  if (!number) {
+    number = 25;
+  }
+
+  request({
+    url: [
+      'https://www.googleapis.com/youtube/v3/search',
+      '?part=id',
+      '&channelId=' + settings.channelId,
+      '&maxResults=' + Math.min(number, 50),
+      '&type=video',
+      '&order=date',
+      '&key=AIzaSyAjj_mH2B04zVPvHa54hEfTs9gwFw-0F6g'
+    ].join(''),
+    method: 'GET',
+  }, function (error, response, body) {
+    if (error) {
+      callback(error, null);
+    } else {
+      body = JSON.parse(body);
+      var videoIds = [];
+      body['items'].forEach(function (value, index) {
+        videoIds.push(value['id']['videoId']);
+      });
+
+      callback(error, videoIds);
+    }
+  });
+};
+
+var updateTagsForVideo = function (videoObject, tags, token, callback) { 
+  console.log(videoObject.snippet.tags);
+  request({
+    url: [
+      'https://www.googleapis.com/youtube/v3/videos',
+      '?access_token=' + token,
+      '&part=snippet'
+    ].join(''),
+    method: 'PUT',
+    json: { 
+      'id': videoObject.id + '',
+      'kind': 'youtube#video',
+      'snippet': {
+        'title': videoObject.snippet.title,
+        'categoryId': videoObject.snippet.categoryId,
+        'tags': tags,
+        'description': videoObject.snippet.description
       }
-    });
-
-    callback(null, idealTags);
-  }, number);
+    }
+  }, function (error, response, body) {
+    callback(error, body);
+  });
 };
 
-var getMostRecentVideosByChannelId = function () {
-
-};
 
 module.exports = {
   getIdsFor: getTopVideoIds,
@@ -135,7 +195,9 @@ module.exports = {
   getTagsFor: getTagsForTopic,
   sortTags: sortTagsByPopularity,
   getSortedTagsFor: getSortedTagsForTopic,
-  getIdealTagsFor: getIdealTagsForTopic
+  getIdealTagsFor: getIdealTagsForTopic,
+  getOwnVideos: getMostRecentVideosByChannelId,
+  updateTagsFor: updateTagsForVideo,
 };
 
 
