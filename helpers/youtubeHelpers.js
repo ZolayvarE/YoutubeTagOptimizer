@@ -1,7 +1,7 @@
 var request = require('request');
 var credentials = require('./keys.js');
 
-var getTopVideoIds = function (number, term, callback) {
+var getTopVideoIds = function (term, callback, number) {
   if (number === undefined) {
     number = 25;
   }
@@ -20,12 +20,12 @@ var getTopVideoIds = function (number, term, callback) {
     body = JSON.parse(body);
     var videoIds = [];
     body['items'].forEach(function (value, index) {
-      videoIds.push(value['id']['videoId'])
-    })
+      videoIds.push(value['id']['videoId']);
+    });
 
     callback(error, videoIds);
   });
-}
+};
 
 var getVideoDetailsById = function (videoIds, callback) {
   if (!Array.isArray(videoIds)) {
@@ -46,11 +46,11 @@ var getVideoDetailsById = function (videoIds, callback) {
     method: 'GET',
   }, function (error, response, body) {
     callback(error, body);
-  })
-}
+  });
+};
 
 var getTagsForTopic = function (topic, callback, number) {
-  getTopVideoIds(number, topic, function (error, ids) {
+  getTopVideoIds(topic, function (error, ids, number) {
     if (error) {
       callback(error, null);
     } else {
@@ -62,14 +62,14 @@ var getTagsForTopic = function (topic, callback, number) {
           var results = [];
           videos['items'].forEach(function (item) {
             results = results.concat(item.snippet.tags);
-          })
+          });
           
           callback(null, results);
         }
-      })
+      });
     }
-  })
-}
+  });
+};
 
 var sortTagsByPopularity = function (tags, callback) {
   var countObject = {};
@@ -81,7 +81,8 @@ var sortTagsByPopularity = function (tags, callback) {
   });
 
   var results = [];
-  var count, wordCount;
+  var count;
+  var wordCount;
   for (var key in countObject) {
     count = countObject[key];
     wordCount = key.split(' ').length;
@@ -89,12 +90,12 @@ var sortTagsByPopularity = function (tags, callback) {
     results.push({
       tag: key,
       popularity: countObject[key],
-    })
+    });
   }
   
   results.sort(function (a, b) {
     return b.popularity - a.popularity;
-  })
+  });
 
   console.log(results);
 };
