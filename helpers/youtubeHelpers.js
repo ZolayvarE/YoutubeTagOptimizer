@@ -1,5 +1,5 @@
 var request = require('request');
-var credentials = require('./keys.js');
+var settings = require('./settings.js');
 
 var getTopVideoIds = function (term, callback, number) {
   if (number === undefined) {
@@ -40,7 +40,7 @@ var getVideoDetailsById = function (videoIds, callback) {
     url: [
       'https://www.googleapis.com/youtube/v3/videos',
       '?part=snippet',
-      '&key=' + credentials.youtubeKey,
+      '&key=' + settings.youtubeKey,
       '&id=' + videoIds.join(','),
     ].join(''),
     method: 'GET',
