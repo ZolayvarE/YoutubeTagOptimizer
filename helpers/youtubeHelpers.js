@@ -97,7 +97,9 @@ var sortTagsByPopularity = function (tags, callback) {
     return b.popularity - a.popularity;
   });
 
-  console.log(results);
+  return results.map(function (item) {
+    return item.tag;
+  });
 };
 
 module.exports = {
