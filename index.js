@@ -48,12 +48,14 @@ app.get('/authenticated', function (req, res) {
 
     console.log('\n\nToken Url:\n' + tokenUrl);
 
-    request.post(tokenUrl, {
-      multipart: [{
-        'content-type': 'application/x-www-form-urlencoded',
-        body: {},
-      }]
-      
+    request.post(tokenUrl, { 
+      form: {
+        'grant_type': 'authorization_code',
+        'code': req.query.code,
+        'client_id': settings.clientID,
+        'client_secret': settings.clientSecret,
+        'redirect_uri': 'http://localhost:3571/authenticated'
+      }
     }, function (error, response, body) {
       console.log('\n\nError:\n' + error);
       console.log('\n\nBody:\n' + body);
