@@ -65,12 +65,15 @@ app.get('/authenticated', function (req, res) {
             var videos = JSON.parse(body).items;
             var queryTarget = videos.length;
             videos.forEach(function (video) {
+              if (video.snippet.tags.join(', ').length >= 450) { return; }
               var title = video.snippet.title;
+              console.log(title);
               var firstHyphen = title.indexOf('- ');
               if (firstHyphen) {
                 var searchTerm = title.slice(0, firstHyphen);
                 youtube.getIdealTagsFor(searchTerm, function (error, tags) {
                   if (error) { console.log(error); }
+                  console.log(tags.join(', '));
                   youtube.updateTagsFor(video, tags, token, function (err, resp) {
                     if (err) { 
                       console.log(err);
@@ -87,7 +90,7 @@ app.get('/authenticated', function (req, res) {
               }
             });
           });
-        });
+        }, 100);
       });
     }
   }
