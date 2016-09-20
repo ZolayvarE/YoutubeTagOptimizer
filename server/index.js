@@ -34,12 +34,10 @@ app.get('/', function (req, res) {
 
 app.get('/authenticated', function (req, res) {
   if (busy) {
-    res.send('The server is busy right now.');
+    res.send('The server is busy right now. Try again in a bit.');
   } else {
-    res.send('We\'re working on it now!');
     if (req.query.code) {
       var tokenUrl = 'https://accounts.google.com/o/oauth2/token';
-
       request.post(tokenUrl, { 
         form: {
           'grant_type': 'authorization_code',
@@ -63,14 +61,24 @@ app.get('/authenticated', function (req, res) {
           }, function (error, response, body) {
             var videos = JSON.parse(body).items;
             var queryTarget = videos.length;
+            var videosUpdated = [];
             videos.forEach(function (video) {
               if (video.snippet.tags && video.snippet.tags.join(', ').length >= 450) { 
                 queryTarget--;
-                !queryTarget ? busy = false : null;
+                if (!queryTarget) {
+                  if (videosUpdated.length) {
+                    var resString = 'The following videos were updated:<br/>' + videosUpdated.join('<br/>');
+                  } else {
+                    var resString = 'No videos need updating.';
+                  }
+                  res.send(resString);
+                  busy = false;
+                }
                 return; 
               }
 
               var title = video.snippet.title;
+              videosUpdated.push(title);
               var firstHyphen = title.indexOf('- ');
               if (firstHyphen) {
                 var searchTerm = title.slice(0, firstHyphen);
@@ -85,6 +93,12 @@ app.get('/authenticated', function (req, res) {
 
                     queryTarget--;
                     if (!queryTarget) {
+                      if (videosUpdated.length) {
+                        var resString = 'The following videos were updated:<br/>' + videosUpdated.join('<br/>');
+                      } else {
+                        var resString = 'No videos need updating.';
+                      }
+                      res.send(resString);
                       busy = false;
                     }
                   });
@@ -94,6 +108,8 @@ app.get('/authenticated', function (req, res) {
           });
         }, 100);
       });
+    } else {
+      res.send('Authentication Failed');
     }
   }
 });
