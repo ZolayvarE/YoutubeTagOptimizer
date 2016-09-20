@@ -83,8 +83,8 @@ var sortTagsByPopularity = function (tags, callback) {
   });
 
   var results = [];
-  var count;
-  var wordCount;
+  var count = undefined;
+  var wordCount = undefined;
   for (var key in countObject) {
     count = countObject[key];
     wordCount = key.split(' ').length;
