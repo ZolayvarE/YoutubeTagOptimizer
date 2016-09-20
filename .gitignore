@@ -1,2 +1,2 @@
 node_modules
-helpers/keys.js
+server/helpers/settings.js
