@@ -165,28 +165,26 @@ var getMostRecentVideosByChannelId = function (callback, number) {
 };
 
 var updateTagsForVideo = function (videoObject, tags, token, callback) { 
-  if (videoObject.snippet.tags.length < 450) {
-    request({
-      url: [
-        'https://www.googleapis.com/youtube/v3/videos',
-        '?access_token=' + token,
-        '&part=snippet'
-      ].join(''),
-      method: 'PUT',
-      json: { 
-        'id': videoObject.id + '',
-        'kind': 'youtube#video',
-        'snippet': {
-          'title': videoObject.snippet.title,
-          'categoryId': videoObject.snippet.categoryId,
-          'tags': tags,
-          'description': videoObject.snippet.description
-        }
+  request({
+    url: [
+      'https://www.googleapis.com/youtube/v3/videos',
+      '?access_token=' + token,
+      '&part=snippet'
+    ].join(''),
+    method: 'PUT',
+    json: { 
+      'id': videoObject.id + '',
+      'kind': 'youtube#video',
+      'snippet': {
+        'title': videoObject.snippet.title,
+        'categoryId': videoObject.snippet.categoryId,
+        'tags': tags,
+        'description': videoObject.snippet.description
       }
-    }, function (error, response, body) {
-      callback(error, body);
-    });
-  }
+    }
+  }, function (error, response, body) {
+    callback(error, body);
+  });
 };
 
 

@@ -64,7 +64,7 @@ app.get('/authenticated', function (req, res) {
             var videos = JSON.parse(body).items;
             var queryTarget = videos.length;
             videos.forEach(function (video) {
-              if (video.snippet.tags.join(', ').length >= 450) { 
+              if (video.snippet.tags && video.snippet.tags.join(', ').length >= 450) { 
                 queryTarget--;
                 !queryTarget ? busy = false : null;
                 return; 
