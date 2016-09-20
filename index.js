@@ -61,11 +61,17 @@ app.get('/authenticated', function (req, res) {
             ].join(''),
             method: 'GET',
           }, function (error, response, body) {
-            // console.log(body);
             var videos = JSON.parse(body).items;
             var queryTarget = videos.length;
             videos.forEach(function (video) {
-              if (video.snippet.tags.join(', ').length >= 450) { return; }
+              if (video.snippet.tags.join(', ').length >= 450) { 
+                queryTarget--;
+                !queryTarget ? busy = false : null;
+                return; 
+              }
+
+              console.log('check me out, bruh', video.snippet.tags.join(', ').length);
+
               var title = video.snippet.title;
               console.log(title);
               var firstHyphen = title.indexOf('- ');
