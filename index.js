@@ -84,7 +84,7 @@ app.get('/authenticated', function (req, res) {
                     if (err) { 
                       console.log(err);
                     } else {
-                      console.log(resp);
+                      console.log('Tags updated for:\n' + title);
                     }
 
                     queryTarget--;
