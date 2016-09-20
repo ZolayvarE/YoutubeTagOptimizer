@@ -70,21 +70,17 @@ app.get('/authenticated', function (req, res) {
                 return; 
               }
 
-              console.log('check me out, bruh', video.snippet.tags.join(', ').length);
-
               var title = video.snippet.title;
-              console.log(title);
               var firstHyphen = title.indexOf('- ');
               if (firstHyphen) {
                 var searchTerm = title.slice(0, firstHyphen);
                 youtube.getIdealTagsFor(searchTerm, function (error, tags) {
                   if (error) { console.log(error); }
-                  console.log(tags.join(', '));
                   youtube.updateTagsFor(video, tags, token, function (err, resp) {
                     if (err) { 
                       console.log(err);
                     } else {
-                      console.log('Tags updated for:\n' + title);
+                      console.log('\nTags updated for:\n' + title);
                     }
 
                     queryTarget--;
