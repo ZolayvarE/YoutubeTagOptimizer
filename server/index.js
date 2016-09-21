@@ -78,7 +78,7 @@ app.get('/authenticated', function (req, res) {
               }
 
               var title = video.snippet.title;
-              videosUpdated.push(title);
+              videosUpdated.push('<a target="_blank" href=https://www.youtube.com/edit?o=U&video_id=' + video.id + '>' + title + '</a>');
               var firstHyphen = title.indexOf('- ');
               if (firstHyphen) {
                 var searchTerm = title.slice(0, firstHyphen);
