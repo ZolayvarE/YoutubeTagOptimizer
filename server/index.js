@@ -54,6 +54,7 @@ app.get('/authenticated', function (req, res) {
             url: [
               'https://www.googleapis.com/youtube/v3/videos',
               '?part=snippet',
+              '&access_token=' + token,
               '&key=' + settings.youtubeKey,
               '&id=' + videoIds.join(','),
             ].join(''),
@@ -78,7 +79,7 @@ app.get('/authenticated', function (req, res) {
               }
 
               var title = video.snippet.title;
-              videosUpdated.push('<a target="_blank" href=https://www.youtube.com/edit?o=U&video_id=' + video.id + '>' + title + '</a>');
+              videosUpdated.push('<a target="_blank" href="https://www.youtube.com/edit?o=U&video_id=' + video.id + '">' + title + '</a>');
               var firstHyphen = title.indexOf('- ');
               if (firstHyphen) {
                 var searchTerm = title.slice(0, firstHyphen);
